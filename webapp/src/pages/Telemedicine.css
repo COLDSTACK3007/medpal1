@@ -1,0 +1,80 @@
+.telemedicine-page {
+    height: calc(100vh - 4rem - var(--mobile-nav-height));
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 768px) {
+    .telemedicine-page {
+        height: calc(100vh - 4rem);
+    }
+}
+
+.video-container {
+    flex: 1;
+    position: relative;
+    background-color: #111827;
+    /* Dark Gray */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    border: none;
+}
+
+.remote-video {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle, #374151 0%, #111827 100%);
+}
+
+.local-video {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 120px;
+    height: 160px;
+    background-color: #4B5563;
+    border-radius: var(--radius-md);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: flex-end;
+    padding: 8px 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
+.call-controls {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 16px;
+    padding: 12px 24px;
+    border-radius: var(--radius-full);
+    background: rgba(31, 41, 55, 0.8) !important;
+    /* Override simple glass */
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.control-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}

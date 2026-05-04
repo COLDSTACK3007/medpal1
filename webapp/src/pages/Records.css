@@ -1,0 +1,187 @@
+.records-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.records-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-secondary {
+    background-color: var(--surface);
+    color: var(--text-main);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-secondary:hover {
+    background-color: var(--surface-hover);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.btn-icon {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+}
+
+.sync-btn {
+    color: var(--text-muted);
+}
+
+.sync-btn.syncing svg {
+    animation: spin 1s linear infinite;
+    color: var(--primary);
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 600px) {
+    .hide-mobile {
+        display: none;
+    }
+}
+
+/* Search Bar */
+.search-bar {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    padding: 0 16px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s;
+}
+
+.search-bar:focus-within {
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    border-color: var(--primary);
+}
+
+.search-icon {
+    margin-right: 12px;
+}
+
+.search-bar input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 16px 0;
+    font-size: 1rem;
+    outline: none;
+    color: var(--text-main);
+}
+
+/* List */
+.patients-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.patient-card {
+    padding: 20px;
+}
+
+.patient-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.patient-avatar {
+    background: #EFF6FF;
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+}
+
+.patient-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.patient-title-row h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.patient-info p {
+    margin: 4px 0 0 0;
+    font-size: 0.9rem;
+}
+
+.patient-details {
+    background-color: var(--background);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.detail-row:last-child {
+    margin-bottom: 0;
+}
+
+.detail-label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.detail-value {
+    font-weight: 500;
+    color: var(--text-main);
+    font-size: 0.9rem;
+}
+
+.patient-actions {
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-text {
+    background: transparent;
+    border: none;
+    color: var(--primary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    transition: background-color 0.2s;
+}
+
+.btn-text:hover {
+    background-color: #EFF6FF;
+}
+
+.empty-state {
+    padding: 40px 20px;
+}

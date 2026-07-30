@@ -1,0 +1,129 @@
+import { useState } from 'react';
+import { Activity, Heart, Droplet, Thermometer, Plus } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+const mockData = [
+  { date: 'Mon', systolic: 120, diastolic: 80, sugar: 95, hr: 72 },
+  { date: 'Tue', systolic: 118, diastolic: 79, sugar: 92, hr: 70 },
+  { date: 'Wed', systolic: 122, diastolic: 82, sugar: 105, hr: 75 },
+  { date: 'Thu', systolic: 119, diastolic: 80, sugar: 98, hr: 71 },
+  { date: 'Fri', systolic: 125, diastolic: 85, sugar: 110, hr: 78 },
+  { date: 'Sat', systolic: 121, diastolic: 81, sugar: 96, hr: 74 },
+  { date: 'Sun', systolic: 118, diastolic: 78, sugar: 90, hr: 72 },
+];
+
+const Vitals = () => {
+  const [activeMetric, setActiveMetric] = useState<'BP' | 'Sugar' | 'HR'>('BP');
+
+  const StatCard = ({ title, value, unit, icon, colorClass, isActive, onClick }: any) => (
+    <div 
+      onClick={onClick}
+      className={`p-4 rounded-2xl border cursor-pointer transition-all duration-200 ${isActive ? 'bg-surface border-brand shadow-md shadow-brand/10' : 'bg-base border-border-dark hover:border-brand/50'}`}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div className={`p-2 rounded-lg ${colorClass}`}>
+          {icon}
+        </div>
+        {isActive && <div className="w-2 h-2 rounded-full bg-brand" />}
+      </div>
+      <p className="text-sm text-txt-secondary font-medium">{title}</p>
+      <h3 className="text-2xl font-bold text-txt mt-1">{value} <span className="text-sm font-normal text-txt-muted">{unit}</span></h3>
+    </div>
+  );
+
+  return (
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand to-teal flex items-center justify-center text-white shadow-lg shadow-brand/20">
+            <Activity size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-txt">Vital Signs Monitor</h1>
+            <p className="text-sm text-txt-muted">Log and track your health trends</p>
+          </div>
+        </div>
+        
+        <button className="flex items-center justify-center gap-2 bg-brand text-white px-5 py-2.5 rounded-xl font-bold shadow-md shadow-brand/20 hover:bg-brand-hover transition-colors">
+          <Plus size={18} />
+          Log Vitals
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard 
+          title="Blood Pressure" 
+          value="118/78" 
+          unit="mmHg" 
+          icon={<Activity size={20} />} 
+          colorClass="bg-blue-500/10 text-blue-500"
+          isActive={activeMetric === 'BP'}
+          onClick={() => setActiveMetric('BP')}
+        />
+        <StatCard 
+          title="Blood Sugar" 
+          value="90" 
+          unit="mg/dL" 
+          icon={<Droplet size={20} />} 
+          colorClass="bg-red-500/10 text-red-500"
+          isActive={activeMetric === 'Sugar'}
+          onClick={() => setActiveMetric('Sugar')}
+        />
+        <StatCard 
+          title="Heart Rate" 
+          value="72" 
+          unit="bpm" 
+          icon={<Heart size={20} />} 
+          colorClass="bg-pink-500/10 text-pink-500"
+          isActive={activeMetric === 'HR'}
+          onClick={() => setActiveMetric('HR')}
+        />
+        <StatCard 
+          title="Temperature" 
+          value="98.6" 
+          unit="°F" 
+          icon={<Thermometer size={20} />} 
+          colorClass="bg-orange-500/10 text-orange-500"
+          isActive={false}
+          onClick={() => {}} // Non-interactive for this demo
+        />
+      </div>
+
+      <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm">
+        <h2 className="text-lg font-bold text-txt mb-6">
+          {activeMetric === 'BP' ? 'Blood Pressure Trends' : 
+           activeMetric === 'Sugar' ? 'Blood Sugar Trends' : 'Heart Rate Trends'}
+        </h2>
+        
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={mockData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-dark)" vertical={false} />
+              <XAxis dataKey="date" stroke="var(--color-txt-muted)" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="var(--color-txt-muted)" fontSize={12} tickLine={false} axisLine={false} />
+              <Tooltip 
+                contentStyle={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)', borderRadius: '8px' }}
+                itemStyle={{ fontWeight: 'bold' }}
+              />
+              
+              {activeMetric === 'BP' && (
+                <>
+                  <Line type="monotone" dataKey="systolic" name="Systolic" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                  <Line type="monotone" dataKey="diastolic" name="Diastolic" stroke="#60a5fa" strokeWidth={3} dot={{ r: 4 }} />
+                </>
+              )}
+              {activeMetric === 'Sugar' && (
+                <Line type="monotone" dataKey="sugar" name="Blood Sugar" stroke="#ef4444" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+              )}
+              {activeMetric === 'HR' && (
+                <Line type="monotone" dataKey="hr" name="Heart Rate" stroke="#ec4899" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+              )}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Vitals;

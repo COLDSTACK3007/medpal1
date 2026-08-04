@@ -24,3 +24,5 @@ npm-debug.log*
 
 # Database (local dev)
 *.db
+credentials.md
+

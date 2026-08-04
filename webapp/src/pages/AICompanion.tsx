@@ -158,10 +158,10 @@ const AICompanion = () => {
                 <div>
                   <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed
                     ${msg.sender === 'bot'
-                      ? 'bg-elevated border border-border-subtle text-txt rounded-bl-sm markdown-body'
+                      ? 'bg-slate-100/90 border border-slate-200 text-slate-900 rounded-bl-sm shadow-sm'
                       : 'bg-brand text-white rounded-br-sm'}`}>
                     {msg.sender === 'bot' ? (
-                      <div className="prose prose-sm max-w-none dark:prose-invert prose-p:leading-relaxed prose-pre:bg-transparent prose-pre:p-0 prose-li:my-0.5">
+                      <div className="prose prose-sm max-w-none text-slate-900 prose-headings:text-slate-900 prose-headings:font-bold prose-strong:text-slate-900 prose-strong:font-semibold prose-p:text-slate-800 prose-p:leading-relaxed prose-li:text-slate-800 prose-li:my-0.5 prose-pre:bg-slate-200/60 prose-pre:text-slate-900">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {msg.text}
                         </ReactMarkdown>
@@ -170,7 +170,7 @@ const AICompanion = () => {
                       <span className="whitespace-pre-wrap">{msg.text}</span>
                     )}
                   </div>
-                  {msg.source && <p className="text-[0.65rem] text-txt-muted mt-1 text-right">{msg.source}</p>}
+                  {msg.source && <p className="text-xs font-semibold text-slate-500 mt-1 text-right">{msg.source}</p>}
                 </div>
               </div>
               {msg.chips && (

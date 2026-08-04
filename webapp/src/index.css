@@ -110,3 +110,19 @@
   ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
   ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 }
+
+/* --- High-Contrast AI Chat Bubble Formatting --- */
+.prose {
+  color: #0f172a !important;
+}
+.prose p, .prose li, .prose span, .prose div {
+  color: #1e293b !important;
+}
+.prose h1, .prose h2, .prose h3, .prose h4, .prose strong, .prose b {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+.prose ul, .prose ol {
+  color: #1e293b !important;
+}
+

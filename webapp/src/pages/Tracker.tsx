@@ -1,16 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Clock, Pill, CalendarClock, Plus, AlertCircle, CheckCircle2, Coffee } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { getMedications, setMedications as persistMedications, type StoredMedication } from '../utils/healthStore';
 
-interface Medication {
-  id: string;
-  name: string;
-  dosage: string;
-  frequency: string;
-  times: string[];
-  condition: string;
-  count: number;
-  total: number;
-}
+type Medication = StoredMedication;
 
 interface Checkup {
   id: string;
@@ -20,26 +13,50 @@ interface Checkup {
   department: string;
 }
 
+const DEFAULT_MEDICATIONS: Medication[] = [
+  {
+    id: '1', name: 'Metformin', dosage: '500mg',
+    frequency: '2x/day', times: ['08:00', '20:00'],
+    condition: 'After Food', count: 12, total: 30
+  },
+  {
+    id: '2', name: 'Aspirin', dosage: '75mg',
+    frequency: '1x/day', times: ['20:00'],
+    condition: 'Anytime', count: 4, total: 30 // Low count
+  },
+  {
+    id: '3', name: 'Amoxicillin', dosage: '250mg',
+    frequency: '3x/day', times: ['08:00', '14:00', '20:00'],
+    condition: 'Before Food', count: 21, total: 30
+  },
+];
+
 const Tracker = () => {
+  const { currentUser } = useAuth();
+  const username = currentUser?.username || '';
+
   const [activeTab, setActiveTab] = useState<'meds' | 'checkups'>('meds');
 
-  const [medications, setMedications] = useState<Medication[]>([
-    { 
-      id: '1', name: 'Metformin', dosage: '500mg', 
-      frequency: '2x/day', times: ['08:00', '20:00'], 
-      condition: 'After Food', count: 12, total: 30 
-    },
-    { 
-      id: '2', name: 'Aspirin', dosage: '75mg', 
-      frequency: '1x/day', times: ['20:00'], 
-      condition: 'Anytime', count: 4, total: 30 // Low count
-    },
-    { 
-      id: '3', name: 'Amoxicillin', dosage: '250mg', 
-      frequency: '3x/day', times: ['08:00', '14:00', '20:00'], 
-      condition: 'Before Food', count: 21, total: 30 
-    },
-  ]);
+  const [medications, setMedicationsState] = useState<Medication[]>(DEFAULT_MEDICATIONS);
+
+  // Load this patient's saved medications (or seed with defaults) on mount / user change
+  useEffect(() => {
+    if (!username) return;
+    const stored = getMedications(username);
+    if (stored && stored.length > 0) {
+      setMedicationsState(stored);
+    } else {
+      setMedicationsState(DEFAULT_MEDICATIONS);
+      persistMedications(username, DEFAULT_MEDICATIONS);
+    }
+  }, [username]);
+
+  // Persist any change to medications for this patient so it can be read
+  // elsewhere (e.g. MedTrace auto-fill)
+  const setMedications = (next: Medication[]) => {
+    setMedicationsState(next);
+    if (username) persistMedications(username, next);
+  };
 
   const [checkups] = useState<Checkup[]>([
     { id: '1', hospital: 'City Care Hospital', date: '2026-08-15', time: '10:00', department: 'Cardiology' }

@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Dumbbell, Bot, Video,
   Search, Bell, Menu, ChevronLeft, ChevronRight,
   MapPin, FileText, Activity, Calendar, Settings,
-  LogOut, User, Globe, Moon, Key, Phone, Mail
+  LogOut, User, Globe, Moon, Key, Phone, Mail, Microscope
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from './context/AuthContext';
@@ -21,6 +21,7 @@ import Tracker from './pages/Tracker';
 import Vault from './pages/Vault';
 import Vitals from './pages/Vitals';
 import Appointments from './pages/Appointments';
+import MedTrace from './pages/MedTrace';
 
 const BrandLogo = ({ collapsed }: { collapsed: boolean }) => (
   <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'} px-2 h-10`}>
@@ -159,6 +160,7 @@ function App() {
     { to: "/fitness", icon: <Dumbbell size={20} />, label: "Fitness & Wellness", section: "main", roles: ['admin', 'user'] },
     { to: "/companion", icon: <Bot size={20} />, label: "AI Companion", section: "main", roles: ['admin', 'user'] },
     
+    { to: "/medtrace", icon: <Microscope size={20} />, label: "MedTrace", section: "clinical", roles: ['admin'] },
     { to: "/tracker", icon: <Bell size={20} />, label: "Medical Tracker", section: "clinical", roles: ['admin', 'user'] },
     { to: "/vault", icon: <FileText size={20} />, label: "Health Vault", section: "clinical", roles: ['admin', 'user'] },
     { to: "/vitals", icon: <Activity size={20} />, label: "Vital Signs", section: "clinical", roles: ['admin', 'user'] },
@@ -484,6 +486,7 @@ function App() {
             <Route path="/" element={currentUser.role === 'admin' ? <Dashboard /> : <UserDashboard />} />
             <Route path="/fitness" element={<Fitness />} />
             <Route path="/companion" element={<AICompanion />} />
+            <Route path="/medtrace" element={<MedTrace />} />
             <Route path="/tracker" element={<Tracker />} />
             <Route path="/vault" element={<Vault />} />
             <Route path="/vitals" element={<Vitals />} />

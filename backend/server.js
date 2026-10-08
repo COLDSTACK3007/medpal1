@@ -47,6 +47,61 @@ if (process.env.GEMINI_API_KEY) {
 }
 
 // -------------------------------------------------------------------
+// Gemini call wrapper: retries transient "model overloaded" (503 /
+// UNAVAILABLE) errors with backoff on the SAME model, and moves on to
+// an alternate model (separate quota pool) on a per-model quota limit
+// (429 / RESOURCE_EXHAUSTED) or a retired/unavailable model (404) —
+// so one model having a bad moment doesn't immediately drop the user
+// to the local rule-based fallback. Only a genuinely fatal error (bad
+// request, auth, etc.) aborts the whole chain immediately.
+//
+// Verified against the live API (2026-10): each model below supports
+// both plain chat and structured JSON mode. gemini-2.5-flash/-lite were
+// deliberately left out — they 404 as "no longer available to new
+// users" on this key, a permanent failure for every request, not
+// something worth cycling back to. gemini-flash-latest currently
+// aliases to gemini-3.8-flash under the hood (visible in its quota
+// error), so the 3.x models below are genuinely distinct capacity
+// pools, not just the same model under another name.
+// -------------------------------------------------------------------
+const GEMINI_MODEL_CHAIN = ['gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-3-flash-preview', 'gemini-3.1-flash-lite'];
+const GEMINI_RETRIES_PER_MODEL = 1; // extra same-model attempts on a transient (503) error
+const GEMINI_RETRY_BASE_DELAY_MS = 500;
+
+function classifyGeminiError(error) {
+  const msg = (error && error.message) || '';
+  if (/"code":\s*503/.test(msg) || /UNAVAILABLE/i.test(msg) || /overloaded/i.test(msg) || /high demand/i.test(msg)) {
+    return 'transient'; // worth retrying the same model shortly
+  }
+  if (/"code":\s*429/.test(msg) || /RESOURCE_EXHAUSTED/i.test(msg) || /"code":\s*404/.test(msg) || /NOT_FOUND/i.test(msg)) {
+    return 'model-unavailable'; // this specific model is out for now/permanently — try another
+  }
+  return 'fatal'; // bad request, auth, etc. — no model swap will fix this
+}
+
+async function generateWithRetry({ config, contents }) {
+  let lastError;
+  for (const model of GEMINI_MODEL_CHAIN) {
+    for (let attempt = 0; attempt <= GEMINI_RETRIES_PER_MODEL; attempt++) {
+      try {
+        return await ai.models.generateContent({ model, config, contents });
+      } catch (error) {
+        lastError = error;
+        const kind = classifyGeminiError(error);
+        console.warn(`Gemini attempt failed (model=${model}, attempt=${attempt + 1}/${GEMINI_RETRIES_PER_MODEL + 1}, kind=${kind}): ${error.message}`);
+        if (kind === 'fatal') throw error; // no amount of retrying or model-swapping helps
+        if (kind === 'model-unavailable') break; // skip straight to the next model, no point retrying this one
+        if (attempt < GEMINI_RETRIES_PER_MODEL) {
+          await new Promise(r => setTimeout(r, GEMINI_RETRY_BASE_DELAY_MS * Math.pow(2, attempt)));
+        }
+        // else: exhausted retries for this model, fall through to the next one in the chain
+      }
+    }
+  }
+  throw lastError;
+}
+
+// -------------------------------------------------------------------
 // System prompts for each mode
 // -------------------------------------------------------------------
 const SYSTEM_PROMPTS = {
@@ -256,8 +311,7 @@ app.post('/api/companion/chat', async (req, res) => {
         parts: [{ text: message }]
       });
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-flash-latest',
+      const response = await generateWithRetry({
         config: {
           systemInstruction: systemPrompt,
           temperature: 0.7,
@@ -431,8 +485,7 @@ app.post('/api/medtrace/analyze', async (req, res) => {
         ...validAttachments.map(a => ({ inlineData: { mimeType: a.mimeType, data: a.data } }))
       ];
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-flash-latest',
+      const response = await generateWithRetry({
         config: {
           systemInstruction: MEDTRACE_SYSTEM_PROMPT,
           temperature: 0.4,

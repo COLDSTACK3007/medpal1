@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Clock, Pill, CalendarClock, Plus, AlertCircle, CheckCircle2, Coffee } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getMedications, setMedications as persistMedications, type StoredMedication } from '../utils/healthStore';
@@ -37,19 +37,16 @@ const Tracker = () => {
 
   const [activeTab, setActiveTab] = useState<'meds' | 'checkups'>('meds');
 
-  const [medications, setMedicationsState] = useState<Medication[]>(DEFAULT_MEDICATIONS);
-
-  // Load this patient's saved medications (or seed with defaults) on mount / user change
-  useEffect(() => {
-    if (!username) return;
+  // Lazily load this patient's saved medications (or seed with defaults) once
+  // on first render — username is stable for the component's lifetime since
+  // App fully remounts on login/logout.
+  const [medications, setMedicationsState] = useState<Medication[]>(() => {
+    if (!username) return DEFAULT_MEDICATIONS;
     const stored = getMedications(username);
-    if (stored && stored.length > 0) {
-      setMedicationsState(stored);
-    } else {
-      setMedicationsState(DEFAULT_MEDICATIONS);
-      persistMedications(username, DEFAULT_MEDICATIONS);
-    }
-  }, [username]);
+    if (stored && stored.length > 0) return stored;
+    persistMedications(username, DEFAULT_MEDICATIONS);
+    return DEFAULT_MEDICATIONS;
+  });
 
   // Persist any change to medications for this patient so it can be read
   // elsewhere (e.g. MedTrace auto-fill)
@@ -95,7 +92,7 @@ const Tracker = () => {
     }
   };
 
-  const takePill = (id: string, _timeIndex: number) => {
+  const takePill = (id: string) => {
     // In a real app we'd track exactly which pill was taken today.
     // For demo, just decrement count.
     setMedications(medications.map(med => 
@@ -234,7 +231,7 @@ const Tracker = () => {
                         <div key={index} className="flex flex-col items-center bg-surface border border-border-dark rounded-xl p-2 min-w-[80px]">
                           <p className="text-sm font-bold text-txt mb-1">{t}</p>
                           <button 
-                            onClick={() => takePill(med.id, index)} 
+                            onClick={() => takePill(med.id)} 
                             className="w-full py-1.5 rounded-lg bg-teal/10 text-teal hover:bg-teal hover:text-white transition-colors text-xs font-bold flex items-center justify-center gap-1"
                           >
                             <CheckCircle2 size={14} /> Take

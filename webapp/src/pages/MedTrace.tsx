@@ -32,11 +32,20 @@ interface MedTraceAnalysis {
   data_sufficiency_note?: string;
 }
 
+interface CaseHistoryInput {
+  symptoms?: string;
+  history?: string;
+  timeline?: TimelineEntry[];
+  labs?: LabEntry[];
+  medications?: MedEntry[];
+  pastDiagnoses?: string[];
+}
+
 interface CaseHistoryItem {
   id: string;
   patientId: string;
   patientName?: string | null;
-  input: any;
+  input: CaseHistoryInput;
   output: MedTraceAnalysis;
   source: string;
   createdAt: string;
@@ -231,14 +240,16 @@ const MedTrace = () => {
           // Non-fatal — the analysis still displays even if saving history failed
         }
       }
-    } catch (e: any) {
-      setError(e.message || 'Server unreachable. Please ensure the backend is running.');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Server unreachable. Please ensure the backend is running.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const SectionCard = ({ icon, title, subtitle, children, onAdd, addLabel }: any) => (
+  const SectionCard = ({ icon, title, subtitle, children, onAdd, addLabel }: {
+    icon: React.ReactNode; title: string; subtitle?: string; children: React.ReactNode; onAdd?: () => void; addLabel?: string;
+  }) => (
     <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">

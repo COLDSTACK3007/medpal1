@@ -150,7 +150,7 @@ const transporter = nodemailer.createTransport({
 });
 
 app.post('/api/emergency/email', async (req, res) => {
-  const { guardianEmail, patientName, patientAge, patientGender, patientContact, patientEmail, patientAddress, locationUrl } = req.body;
+  const { guardianEmail, patientName, patientAge, patientGender, patientContact, patientEmail, patientAddress, locationUrl, description } = req.body;
 
   if (!guardianEmail) {
     return res.status(400).json({ error: 'Guardian email is required' });
@@ -165,7 +165,8 @@ app.post('/api/emergency/email', async (req, res) => {
         <h2 style="color: #e74c3c; text-align: center;">🚨 CRITICAL EMERGENCY ALERT 🚨</h2>
         <p style="font-size: 16px; color: #333;">This is an automated priority alert from the MedPal Emergency System.</p>
         <p style="font-size: 16px; color: #333;"><strong>${patientName}</strong> has triggered an SOS and requires immediate assistance.</p>
-        
+        ${description ? `<p style="font-size: 15px; color: #c0392b; background: #fdecea; padding: 10px 14px; border-radius: 6px;"><strong>Message from patient:</strong> ${description}</p>` : ''}
+
         <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
           <h3 style="margin-top: 0; color: #2c3e50;">Patient Details:</h3>
           <ul style="list-style-type: none; padding: 0;">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Activity, Heart, Droplet, Thermometer, Plus, X } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../context/AuthContext';
@@ -14,24 +14,49 @@ const DEFAULT_VITALS: StoredVitalEntry[] = [
   { date: 'Sun', systolic: 118, diastolic: 78, sugar: 90, hr: 72 },
 ];
 
+interface VitalMetricCardProps {
+  title: string;
+  value: string | number;
+  unit: string;
+  icon: ReactNode;
+  colorClass: string;
+  isActive: boolean;
+  onClick: () => void;
+}
+
+const VitalMetricCard = ({ title, value, unit, icon, colorClass, isActive, onClick }: VitalMetricCardProps) => (
+  <div
+    role="button"
+    tabIndex={0}
+    onClick={onClick}
+    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+    className={`p-4 rounded-2xl border cursor-pointer transition-all duration-200 ${isActive ? 'bg-surface border-brand shadow-md shadow-brand/10' : 'bg-base border-border-dark hover:border-brand/50'}`}
+  >
+    <div className="flex items-center justify-between mb-3">
+      <div className={`p-2 rounded-lg ${colorClass}`}>
+        {icon}
+      </div>
+      {isActive && <div className="w-2 h-2 rounded-full bg-brand" />}
+    </div>
+    <p className="text-sm text-txt-secondary font-medium">{title}</p>
+    <h3 className="text-2xl font-bold text-txt mt-1">{value} <span className="text-sm font-normal text-txt-muted">{unit}</span></h3>
+  </div>
+);
+
 const Vitals = () => {
   const { currentUser } = useAuth();
   const username = currentUser?.username || '';
 
   const [activeMetric, setActiveMetric] = useState<'BP' | 'Sugar' | 'HR'>('BP');
-  const [vitalsLog, setVitalsLogState] = useState<StoredVitalEntry[]>(DEFAULT_VITALS);
+  // Lazily seeded from the store once — username is stable for the
+  // component's lifetime since App fully remounts on login/logout.
+  const [vitalsLog, setVitalsLogState] = useState<StoredVitalEntry[]>(() => {
+    if (!username) return DEFAULT_VITALS;
+    const stored = getVitalsLog(username);
+    return stored && stored.length > 0 ? stored : DEFAULT_VITALS;
+  });
   const [showLogModal, setShowLogModal] = useState(false);
   const [newEntry, setNewEntry] = useState({ systolic: '', diastolic: '', sugar: '', hr: '', temp: '' });
-
-  useEffect(() => {
-    if (!username) return;
-    const stored = getVitalsLog(username);
-    if (stored && stored.length > 0) {
-      setVitalsLogState(stored);
-    } else {
-      setVitalsLogState(DEFAULT_VITALS);
-    }
-  }, [username]);
 
   const latest = vitalsLog[vitalsLog.length - 1] || {};
 
@@ -54,22 +79,6 @@ const Vitals = () => {
     setShowLogModal(false);
   };
 
-  const StatCard = ({ title, value, unit, icon, colorClass, isActive, onClick }: any) => (
-    <div
-      onClick={onClick}
-      className={`p-4 rounded-2xl border cursor-pointer transition-all duration-200 ${isActive ? 'bg-surface border-brand shadow-md shadow-brand/10' : 'bg-base border-border-dark hover:border-brand/50'}`}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <div className={`p-2 rounded-lg ${colorClass}`}>
-          {icon}
-        </div>
-        {isActive && <div className="w-2 h-2 rounded-full bg-brand" />}
-      </div>
-      <p className="text-sm text-txt-secondary font-medium">{title}</p>
-      <h3 className="text-2xl font-bold text-txt mt-1">{value} <span className="text-sm font-normal text-txt-muted">{unit}</span></h3>
-    </div>
-  );
-
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
@@ -90,7 +99,7 @@ const Vitals = () => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard
+        <VitalMetricCard
           title="Blood Pressure"
           value={latest.systolic ? `${latest.systolic}/${latest.diastolic}` : '--/--'}
           unit="mmHg"
@@ -99,7 +108,7 @@ const Vitals = () => {
           isActive={activeMetric === 'BP'}
           onClick={() => setActiveMetric('BP')}
         />
-        <StatCard
+        <VitalMetricCard
           title="Blood Sugar"
           value={latest.sugar ?? '--'}
           unit="mg/dL"
@@ -108,7 +117,7 @@ const Vitals = () => {
           isActive={activeMetric === 'Sugar'}
           onClick={() => setActiveMetric('Sugar')}
         />
-        <StatCard
+        <VitalMetricCard
           title="Heart Rate"
           value={latest.hr ?? '--'}
           unit="bpm"
@@ -117,7 +126,7 @@ const Vitals = () => {
           isActive={activeMetric === 'HR'}
           onClick={() => setActiveMetric('HR')}
         />
-        <StatCard
+        <VitalMetricCard
           title="Temperature"
           value={latest.temp ?? '98.6'}
           unit="°F"

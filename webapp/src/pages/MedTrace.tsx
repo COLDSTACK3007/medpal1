@@ -66,6 +66,32 @@ const ALLOWED_ATTACHMENT_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'appl
 const MAX_ATTACHMENTS = 5;
 const MAX_ATTACHMENT_MB = 8;
 
+const SectionCard = ({ icon, title, subtitle, children, onAdd, addLabel }: {
+  icon: React.ReactNode; title: string; subtitle?: string; children: React.ReactNode; onAdd?: () => void; addLabel?: string;
+}) => (
+  <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2.5">
+        <div className="w-9 h-9 rounded-xl bg-brand-glow text-brand-light flex items-center justify-center">{icon}</div>
+        <div>
+          <h3 className="text-sm font-bold text-txt">{title}</h3>
+          {subtitle && <p className="text-xs text-txt-muted">{subtitle}</p>}
+        </div>
+      </div>
+      {onAdd && (
+        <button onClick={onAdd} className="flex items-center gap-1 text-xs font-semibold text-brand-light hover:text-brand bg-brand-glow px-3 py-1.5 rounded-full transition-colors">
+          <Plus size={13} /> {addLabel}
+        </button>
+      )}
+    </div>
+    {children}
+  </div>
+);
+
+const RowInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
+  <input {...props} className="w-full px-3 py-2 bg-input border border-border rounded-lg text-xs text-txt placeholder:text-txt-muted outline-none focus:border-brand transition-all" />
+);
+
 const MedTrace = () => {
   const { allUsers } = useAuth();
   const patients = allUsers.filter(u => u.role === 'user');
@@ -98,8 +124,8 @@ const MedTrace = () => {
 
   // Fetch saved case history whenever the selected patient changes
   useEffect(() => {
-    if (!selectedPatient) { setCaseHistory([]); return; }
     (async () => {
+      if (!selectedPatient) { setCaseHistory([]); return; }
       try {
         const res = await fetch(`${API_BASE_URL}/api/medtrace/cases/${encodeURIComponent(selectedPatient)}`);
         if (res.ok) {
@@ -246,32 +272,6 @@ const MedTrace = () => {
       setIsLoading(false);
     }
   };
-
-  const SectionCard = ({ icon, title, subtitle, children, onAdd, addLabel }: {
-    icon: React.ReactNode; title: string; subtitle?: string; children: React.ReactNode; onAdd?: () => void; addLabel?: string;
-  }) => (
-    <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-brand-glow text-brand-light flex items-center justify-center">{icon}</div>
-          <div>
-            <h3 className="text-sm font-bold text-txt">{title}</h3>
-            {subtitle && <p className="text-xs text-txt-muted">{subtitle}</p>}
-          </div>
-        </div>
-        {onAdd && (
-          <button onClick={onAdd} className="flex items-center gap-1 text-xs font-semibold text-brand-light hover:text-brand bg-brand-glow px-3 py-1.5 rounded-full transition-colors">
-            <Plus size={13} /> {addLabel}
-          </button>
-        )}
-      </div>
-      {children}
-    </div>
-  );
-
-  const RowInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-    <input {...props} className="w-full px-3 py-2 bg-input border border-border rounded-lg text-xs text-txt placeholder:text-txt-muted outline-none focus:border-brand transition-all" />
-  );
 
   return (
     <div className="animate-fade-in max-w-6xl mx-auto space-y-6 p-4 sm:p-6 lg:p-8">

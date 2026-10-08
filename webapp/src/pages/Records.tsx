@@ -54,7 +54,7 @@ const Records = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-lg font-bold text-txt">{p.fullName || p.username}</h3>
-                    {p.hasOnboarded && <CheckCircle2 size={16} className="text-teal" title="Onboarded" />}
+                    {p.hasOnboarded && <span title="Onboarded"><CheckCircle2 size={16} className="text-teal" /></span>}
                   </div>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm text-txt-secondary">
                     {p.age && <span>{p.age} yrs • {p.gender}</span>}

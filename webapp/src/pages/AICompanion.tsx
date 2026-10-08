@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useSearchParams, useLocation } from 'react-router-dom';
 import { Send, User, Sparkles, Activity } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 interface Message {
   id: string;
@@ -83,7 +84,7 @@ const AICompanion = () => {
         const lbl = METHOD_OPTIONS.find(m => m.id === selectedMethod)?.label || '';
         fullMessage = `[Focus on ${lbl}] ${query}`;
       }
-      const res = await fetch('http://localhost:3001/api/companion/chat', {
+      const res = await fetch(`${API_BASE_URL}/api/companion/chat`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: fullMessage, mode: isFitnessMode ? 'fitness' : 'triage',

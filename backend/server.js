@@ -2,20 +2,37 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { GoogleGenAI } = require('@google/genai');
+const { Pool } = require('pg');
+const { PrismaPg } = require('@prisma/adapter-pg');
 const { PrismaClient } = require('@prisma/client');
 const nodemailer = require('nodemailer');
 
 const app = express();
 let prisma = null;
-try {
-  prisma = new PrismaClient();
-} catch(e) {
-  console.warn("⚠️ Prisma client failed to initialize:", e.message);
+if (process.env.DATABASE_URL) {
+  try {
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    const adapter = new PrismaPg(pool);
+    prisma = new PrismaClient({ adapter });
+    console.log('✅ Prisma connected with PostgreSQL/Neon driver adapter.');
+  } catch(e) {
+    console.warn("⚠️ Prisma client failed to initialize:", e.message);
+  }
+} else {
+  console.warn("⚠️ No DATABASE_URL found. Database sync will be unavailable.");
 }
 const PORT = process.env.PORT || 3000;
 
 app.use(cors()); // Allow all origins for production flexibility
 app.use(express.json());
+
+// In Vercel serverless environment, ensure routes match whether /api prefix is stripped or retained
+app.use((req, res, next) => {
+  if (!req.url.startsWith('/api')) {
+    req.url = '/api' + (req.url === '/' ? '' : req.url);
+  }
+  next();
+});
 
 // -------------------------------------------------------------------
 // Gemini AI Client Initialization
@@ -304,7 +321,7 @@ app.post('/api/sync', async (req, res) => {
     
     await Promise.all(upsertPromises);
     
-    res.json({ status: 'success', message: 'Records successfully synced to Supabase!', count: records.length });
+    res.json({ status: 'success', message: 'Records successfully synced to database!', count: records.length });
   } catch (error) {
     console.error('Failed to sync to database:', error);
     res.status(500).json({ error: 'Database sync failed' });
@@ -329,8 +346,12 @@ app.post('/api/fitness/recommend', (req, res) => {
 });
 
 // -------------------------------------------------------------------
-// Start server
+// Start server locally (or export for Vercel Serverless Function)
 // -------------------------------------------------------------------
-app.listen(PORT, () => {
-  console.log(`🚀 MedPal Backend listening on port ${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 MedPal Backend listening on port ${PORT}`);
+  });
+}
+
+module.exports = app;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Clock, Pill, CalendarClock, Bell, Plus, AlertCircle, CheckCircle2, Coffee } from 'lucide-react';
+import { Clock, Pill, CalendarClock, Plus, AlertCircle, CheckCircle2, Coffee } from 'lucide-react';
 
 interface Medication {
   id: string;
@@ -41,7 +41,7 @@ const Tracker = () => {
     },
   ]);
 
-  const [checkups, setCheckups] = useState<Checkup[]>([
+  const [checkups] = useState<Checkup[]>([
     { id: '1', hospital: 'City Care Hospital', date: '2026-08-15', time: '10:00', department: 'Cardiology' }
   ]);
 
@@ -78,7 +78,7 @@ const Tracker = () => {
     }
   };
 
-  const takePill = (id: string, timeIndex: number) => {
+  const takePill = (id: string, _timeIndex: number) => {
     // In a real app we'd track exactly which pill was taken today.
     // For demo, just decrement count.
     setMedications(medications.map(med => 

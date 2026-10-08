@@ -1,4 +1,4 @@
-import { Video, Phone, MessageCircle, Calendar, ArrowRight } from 'lucide-react';
+import { Video, Phone, MessageCircle, ArrowRight } from 'lucide-react';
 
 const Telemedicine = () => {
   const services = [
